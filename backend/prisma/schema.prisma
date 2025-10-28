@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Libro {
+  id        Int          @id @default(autoincrement())
+  isbn      String       @unique
+  titulo    String
+  autor     String
+  estado    EstadoLibro  @default(DISPONIBLE)
+  prestamos Prestamo[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("libros")
+}
+
+model Socio {
+  id          Int        @id @default(autoincrement())
+  numeroSocio Int        @unique @default(autoincrement())
+  nombre      String
+  dni         String     @unique
+  email       String?
+  telefono    String?
+  prestamos   Prestamo[]
+  multas      Multa[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("socios")
+}
+
+model Prestamo {
+  id                  Int             @id @default(autoincrement())
+  socioId             Int
+  libroId             Int
+  fechaInicio         DateTime        @default(now())
+  fechaDevolucion     DateTime
+  fechaDevolucionReal DateTime?
+  estado              EstadoPrestamo  @default(ACTIVO)
+  
+  socio               Socio           @relation(fields: [socioId], references: [id])
+  libro               Libro           @relation(fields: [libroId], references: [id])
+  multas              Multa[]
+  
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@map("prestamos")
+}
+
+model Multa {
+  id         Int       @id @default(autoincrement())
+  prestamoId Int
+  socioId    Int
+  monto      Float
+  motivo     String
+  pagada     Boolean   @default(false)
+  fechaPago  DateTime?
+  
+  prestamo   Prestamo  @relation(fields: [prestamoId], references: [id])
+  socio      Socio     @relation(fields: [socioId], references: [id])
+  
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("multas")
+}
+
+enum EstadoLibro {
+  DISPONIBLE
+  PRESTADO
+}
+
+enum EstadoPrestamo {
+  ACTIVO
+  DEVUELTO
+  VENCIDO
+}
