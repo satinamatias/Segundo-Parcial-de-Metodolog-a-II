@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
-    "build": "npx prisma generate",
+    "build": "npx prisma generate && npx prisma migrate deploy",
     "test": "jest",
     "prisma:studio": "npx prisma studio",
     "prisma:migrate": "npx prisma migrate dev"
